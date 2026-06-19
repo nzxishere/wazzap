@@ -289,3 +289,7 @@ task.wait(6)
 
 -- 4. Hancurkan GUI
 screenGui:Destroy()
+
+if not success then
+    -- Jika gagal, tidak melakukan apa-apa agar tidak mengganggu
+end
