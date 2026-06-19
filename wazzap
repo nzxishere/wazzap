@@ -1,83 +1,311 @@
--- // Wrapper: Wazzap + Denghub UI + Minimize ReduceMons + Close Delta
+-- wazzap test field
 
--- 1. Jalankan script Wazzap asli dari GitHub
-local success, err = pcall(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/m0nsfams/reduce.v1/refs/heads/main/chreva"))()
+-- === String Constants ===
+local Constants = { [1] = "\157\0046\191\176\242\234\208Ga", [2] = "\193\028GTM^q|3\227A\139\178'\145\\", [3] = "Connect", [4] = "K\0269a\254\195\178I", [5] = "\169\213b\158", [6] = "Color3", [7] = "\138uz\012", [8] = "a\192.\1330", [9] = "\176/\178\171\0186", [10] = "\127\141\229u", [11] = "\019V\249e", [12] = "A\189\222z\139e\164T[\238", [13] = "(\200)", [14] = "\005\139\135", [15] = "\235\242M", [16] = "5\214E\012", [17] = "w6w\209", [18] = "__len", [19] = "\234\249D", [20] = "I\211\209\134\254\145L\149o\205+;o/^", [21] = "\202#\251\169\143{rMKx9i.\223", [22] = "loadstring", [23] = "/\137J\207D\164\209\133\252G", [24] = "\t", [25] = "\1394\208\031\198)\029!", [26] = "\004\002\217\210\012\202\255", [27] = "\011\\\0041", [28] = "\164\216s\213mJ\164\215\165", [29] = "\166\237\129\226Q\178", [30] = "dz\2283\158\253\144V\241", [31] = "qg\0281", [32] = "\143?\249\204\181%\153k", [33] = "u\160\218WU", [34] = "g\222\011\006\023W_\129", [35] = "O\221?|\212", [36] = "GKrkm5AiREzs", [37] = "EZP0X0AH8jJH", [38] = "L", [39] = "rtRdjAVr02t2o", [40] = "\012-d", [41] = "\176\154\016\004\140", [42] = "\195\227\224\201", [43] = "\157>\175j\151\006r\233\246\152\143G\227", [44] = "\127P\2331\237_", [45] = "floor", [46] = "pJDD00a3guOb3", [47] = "IsA", [48] = "\\\198\213", [49] = "\178w\227d", [50] = "e\164\182\185]N\154", [51] = "/\210RQ<\015\226Q", [52] = "\154\127b\167", [53] = "4~\214P\012\246\t", [54] = "\214\148\137\189e", [55] = "\207\232\221k,N\213\134\246\235\132\155\1897\205\214", [56] = "\174\024\r\208=^$\238\252\159\167\016", [57] = "Destroy", [58] = "NNF", [59] = "QaOZhE5bgfQBu", [60] = "Z \1559\028\003\\", [61] = "\224\137\193\223", [62] = "\nko\022\169", [63] = "\151P\172\218\139\250\232\031\129#", [64] = "eo|b\211\210\017j\248B\186Z:W\189{\190?\186\255\235\194\129\250\130_gV\142\150\179\177\224wT9*\180lM\028\\\176\244\217u\201n\138\211\238\168\255!\224\187\185\\\131\133\148\162\150\248F\221\230\139i+\141", [65] = "nevBmiYsf4BBH", [66] = "@\250G", [67] = "hk^*B\131", [68] = "\171\192\209$", [69] = "c\227 \189%\164\147\217\223", [70] = "l\194\198X\212\127", [71] = "X\234\255\\d|", [72] = "A\245x", [73] = "`\019\tF", [74] = "\155L\151\245D\186R\2162\196\242\215", [75] = "\162\012\1314", [76] = "\238:J\240\223\183{\222\213\182\148\182\197", [77] = "\222\140Z\186JY", [78] = "-\026p\222\012w\185\164", [79] = "len", [80] = "\242\176\160\011\210\191\186\"L\244[\023G", [81] = "parxQ\nF\2316\209Ge", [82] = "\183\204\206HwI?/=A", [83] = "\151\248D", [84] = "\217\162\191\017\\\193\008\244", [85] = "\136\251\246-", [86] = "\234\185\246", [87] = "\132\154\132K", [88] = "z\243\177p", [89] = "\202\226\141_", [90] = "\225\004R\250\165\243\"\142\250\243Fd", [91] = "\1923", [92] = ">\151\186i\213[J3\161M\197J\002\245\023z\016V\141\212\162\196", [93] = "\239\132s\209", [94] = "^\210c:\202\214\026\176RS\nUB", [95] = "AlYfEs1ysMhrt", [96] = "d\237\\", [97] = "error", [98] = "<-\247`\199`9\153\210", [99] = "x\147\220\199/[\168", [100] = "\1863\026\230\020\004\244H\2399", [101] = "\156o\155\209\201DM\171\008\021", [102] = "\162\r\199=\169\189Q\127\216\219w\015\171", [103] = "FindFirstChildOfClass", [104] = "task", [105] = "\205n\231W\226\204n\151\026\022h\223\133\219\218\233\020!1\188Tl", [106] = "GetService", [107] = "\014\176H\232\170", [108] = "$", [109] = "]!\137fqh\254k\246x\178\208\245\165\n\155y9Z\005`\225", [110] = "\165K\014", [111] = "O\250\206\175", [112] = "qzn1DPDKW5x8Y8", [113] = "\135AwL#y[\220=C\003\199", [114] = "q\1290\210\193\022\156\156", [115] = "\029~\205\229\233%\197L\205", [116] = "\011\214\171^\240l\159\022\165M\030\203\180\243H\005q", [117] = "]\220b\214\133", [118] = "\200'\031\160Hh\225\231]", [119] = "\177\027.\rum\023\170", [120] = "\180\159)", [121] = "\201\168\213\014\027#\n\197v\176", [122] = "gr\245\132?", [123] = "Sjd1rNDbLadV", [124] = "\220\222\029\241", [125] = "\154U\014\018\018\196~\174", [126] = "\174\2439\001 \188\1795%", [127] = "unpack", [128] = "S0ubOgSx6Hllh", [129] = "\245\255\177\149\164\207\031\194\161\166\1863\178", [130] = "w\196\204\188\211G", [131] = "TR\238\164\255\189\129\182\165", [132] = "z\139\249", [133] = "d\206\203 g\230\175IBZ8\137\252\143\189\129", [134] = "\018\156\027\018L\220\236", [135] = "\137\212\181;", [136] = "\154\021\241;", [137] = "\198\019`\017\191P\180\247\21213\233\234U\217%\r\131\155\136a", [138] = "\177\139\197\171", [139] = "GQ<\\\213", [140] = "\006'\132w\234\004\233", [141] = "\020\206\201s\207\024\1939\188h<LN", [142] = "IFz0hs7tYQEy2", [143] = "i\006\201\133\159", [144] = "uZ", [145] = "\145(\205\185\153:\190\015/\021\r\216&'\189\188", [146] = "'\137\181\151\161\174", [147] = "v\141\197\145\004", [148] = "\242\017\136\168\190\023\154\188\160\146", [149] = "\236\024\019\251\\y\214b\223\220\2359\151%\222\021\170P", [150] = "\232\178\234)", [151] = "\141\130\178\243o\016b", [152] = "\141\153\248", [153] = "\137M\018\211\150#\2171\023", [154] = "\190\019\210\186\233", [155] = "GetPlayers", [156] = "\236\014U", [157] = "__gc", [158] = "\230\253\200\188\003\"\1527\155P", [159] = "I\144\242", [160] = "Enum", [161] = "\204", [162] = "\206_X\n\188\237", [163] = "y\018Q\196\229", [164] = "lCTpyKPF6My38", [165] = "3\255\225s\218\193\228(\\\241\231\183R\172", [166] = ":(%d*):", [167] = "\235\188#\164\134^\240\021\231", [168] = "\219\138\222,", [169] = "\158\212s", [170] = "/2}\219", [171] = "lX\02844\145n\162", [172] = "Clear", [173] = "l1", [174] = "\2299\219h)\129", [175] = "setmetatable", [176] = "\005\176\025", [177] = "\001Quy", [178] = "\247d\188\150\164\218\253h\208\\\209\029\244\128", [179] = "0\252\019\213\146}", [180] = "\249\193V\245\026b", [181] = "n\168\183\129d@\228\211g", [182] = "0\139", [183] = "\132\168:\143\169\235ak:\252\193\143", [184] = "\202s\029\127~\164\192 \220", [185] = "\008fb\218\007;#\031", [186] = "string", [187] = "os", [188] = "\247\201\254\166f\144\192\170\131\149\017\146", [189] = "\165\191\208\249\006R\161\134\025", [190] = "7\255\004\185\023\146\247\023", [191] = "game", [192] = "\229m\189\163\130\136\223\000{\151\184\0168\216", [193] = "\025\247\235\174z\244?\143\160l\143:J", [194] = "\181\190\011r", [195] = "\029\175\227\175\159D", [196] = "c\008LV\006\237\029H?\160x\209b\157]\197\234\216\t\136RL\rS\195\130\217\223\163\232\193et\222j\237\152\227\208\214+\151\194\202\031SY`\244TXt\000a\141J+\205\157py\212\241\014\002X\0255\1518ynX\012", [197] = "lKP3dKIQrruqTb", [198] = "`\132\246r\003\004\131`8\214J\021\254\224\231\168\239[\140\139e", [199] = "zcQWJbtP3nV3ML", [200] = "c#\163_", [201] = "$\215r", [202] = "GetChildren", [203] = "\157\161\220;=W\187Fd\245", [204] = "(\188\144\238\209'F\227@\172", [205] = "M.\245", [206] = "UDim2", [207] = ":", [208] = "lbfT6VaXix8F4Y", [209] = "iygC4kwybq3316", [210] = "\159\236-\156\161\0057\0117\176\2326\252\028\028\188\001@\233=?\169", [211] = "9ECr\171jU\167", [212] = "\179\224T3Cta\129", [213] = "}n\153", [214] = "(\169i", [215] = "\160\234\143", [216] = "\218\026\189\189:", [217] = "W\0024Ez\128}\142\016C>5`%\156no\143Ai)\193", [218] = "+\237\203", [219] = "\247e\180\164\197\214\188", [220] = "\007\209\248\212S\240\200\"\190P^\143\026\227\129\237", [221] = "\162\132\253\213", [222] = "\130\022\198\001", [223] = "r1gOgGNrhdu0", [224] = "F\031\181\n-", [225] = "\175\019umvus", [226] = "\149]\235\025{\014\226X\190s~K", [227] = "\253\223\250", [228] = "c\023\130\140\161\018\207I", [229] = "sHYmaRK6oduAVm", [230] = "\016\218\030\127\154\222O\143E", [231] = "TnaUFtZrJs6r4", [232] = "\1610\192\208a\166\178", [233] = "\t\185\016\129", [234] = "\254\193\127\165", [235] = "Ci5G6LxUDm9c09", [236] = "\214X$", [237] = "\228F\023\195\252A\148\223\250\231", [238] = "pcall", [239] = "\144\170U5Vw", [240] = "\237\164", [241] = "\249T\171\128\r\154W\164\240\129\202\236r\219\014\246\223e\227\235^\247", [242] = "setfpscap", [243] = "\157(", [244] = ">\1328C", [245] = "\160\213\137G", [246] = "\191\179\233\2309", [247] = "\210\184\139\225le", [248] = "\030\184+t\160", [249] = "\173\178\142\015\007A:#\176\008\225t\252\128\215\149\158\197;z6\255&\166\001a\244k\025\223\221\008\161\235\169\211\202\201\2435\160f\236\153\221\141\141@\230m\1398\141\157?\225\155P;\133\148\129\135\198a\148\156eK\158\031", [250] = "\255 \154\185\177(\227uX\198\247sMG\146\169\162", [251] = "g\141\215n\140\149\240\172\nN\248\189f[(", [252] = "OYXnEiyfXssT", [253] = "\162\022?", [254] = "igGEpzXEPQz4", [255] = "$\229n\243{\238$r", [256] = "P\157\156\210", [257] = "W79ReQ4ELPDnvz", [258] = "\229\190\209\007\191\204", [259] = "P\187\254R\239\163\188T\198\194\214\241d", [260] = "R\192\168<\250\133_\236AS", [261] = "\211b\188R8\189\011\149\235\237\197\208 ", [262] = "settings", [263] = "EHB\004#|\248\t", [264] = "\246n\004\133", [265] = "\190\141\165", [266] = "bxpV8EnR5bEb", [267] = "\195SvK\247X\136\203", [268] = "\145,YL!\031y<\226Cs?q", [269] = "Z\r\158\153\180\250\162\135", [270] = "\249\031\148\188\019\028\006ps\219", [271] = "IHxTiL9euWmQl", [272] = "\240\248\224", [273] = "\155T\021\1780#\028\002\197\194", [274] = "\138s\169\185", [275] = "\008\151\169H\199:_\0118\150", [276] = "n5t54d0o93m0", [277] = "warn", [278] = "\163\203/&", [279] = "`\029\025\138\230\235F\193", [280] = "\223h\018", [281] = "g\209\193#\254", [282] = "\151\229U\255S\163", [283] = "B\240F\215\218\003?", [284] = "\246\235\252\169\2328", [285] = "fzU", [286] = "\240\213\160\203\250\024\148\238\230\222\149#\196\252\232\135\153)8XI", [287] = "[h\2289E\\v@WW\2258\203\017\176\136\000", [288] = "\128\019H3\024", [289] = "gqV2noay3KkO", [290] = "\218$B", [291] = "gmatch", [292] = "pkknlrhJdQVy", [293] = "\031)", [294] = "K\003\206q\167&F_\131xW\167\134", [295] = "(\250\201[o", [296] = "ipairs", [297] = "\231s\030Mb\170!", [298] = "\215\162\216", [299] = "\170\020\134", [300] = "\019\002S", [301] = "JdYCOogVKt8bA", [302] = "\228r\227\242PP\232\246\213", [303] = "MSfMmvXKVynDP", [304] = "agJg^\153=\144\202\214\227fP\205\174\157\187\144D\187U\142\030\025W\002]=\175P,\220\188\140E\197S\0020\226\136_\182\191'\"~oy\023 9\226*>x\154\217pI\217\241\141\183\254]g\128.\1802o\136\243", [305] = "\239{\246", [306] = "\128\n\r|vE=E\140\171\025I", [307] = "\220\134\206\244i\146\185", [308] = "2}\146*J\210\218\006z", [309] = "X\164\222\029\2245_\188\014", [310] = "OGczThlyxWsbJ", [311] = "IE<3\230\030z\202\016\031\140\016@", [312] = "\026\237?\244S\143Tp\149[\0301^\211~\134", [313] = "workspace", [314] = "\193X\017", [315] = "B\018\247\228A\187\016\014\216\242\202@J\158\186%\225f]).-", [316] = "\175\018L\1377\252\192yO\174l\200\188\130\025\239\234\129\145<\236\185", [317] = "9@\220\2535y\141q", [318] = "vB\206\239\173\223I", [319] = "\1887$\244\244\026", [320] = "\018d\154\144\252-\n8v", [321] = "l\237\217\249", [322] = "\129\143\245", [323] = "\015\211&\214\162\232!u", [324] = "\151\001\251\216", [325] = "\029\024\216\206\031\205\184\154L\199", [326] = "\208\165\244", [327] = "\147v\163\018\178\006\252", [328] = "j\203K", [329] = "B|V;#", [330] = "\031\163\236\210", [331] = "\134W2\157", [332] = "L\183\191\025", [333] = "\020xpw\195XxO", [334] = "\017p/|Q\207\160\\b&", [335] = "\213a\139\224", [336] = ">\174\004\226", [337] = "\243C:\174:7\019\159\129", [338] = "\244h\024\161\144+\182L", [339] = "\193\141=\130q\172Ro", [340] = "m\024\002L\171k\210l\245(\166\189\145\1382", [341] = "\223\000\204\227*\155\019\135", [342] = "\165\169e\025", [343] = "\022\019\007\206\234\156\226\244\213i", [344] = "\242\028X\252", [345] = "\229`\193\168\231\162+\192", [346] = "\143\253\014\t:<\145<", [347] = "__index", [348] = "^*|\213-", [349] = "__metatable", [350] = "remove", [351] = "uQ7qqrREbGEo4", [352] = "\206\1549@\178\225\170\018H\\\180Q\130\174", [353] = "\189Z\143\245\151", [354] = "phpdxyHj2NFL", [355] = "\015b\223\244\243_\141\168\205", [356] = "\001\210\251\248c\178", [357] = "h\156\002Q\r`\162\021s`", [358] = "\192F\182\149\225u\247\197", [359] = "UDim", [360] = "\142\031\130\012", [361] = "tonumber", [362] = "\147<[\158@\136\160\222", [363] = "\235\026/", [364] = "\173t$\002Y", [365] = "\003k\223\014", [366] = "\245\186W'\146\224\196\231", [367] = "N\239\025", [368] = "\213[\\r\229W\236\030:\023\214", [369] = "\192\162\185x\255\244n", [370] = "q\184\149\161\2216\173\177", [371] = "C>y\1693{\202\153\227\172]\240", [372] = "B\149f\146\243\234_[\212:\168\026", [373] = "\020\252\165gc\025\131y\182", [374] = "V", [375] = "*\243\154p}\030\140~\165\255X\166\135\199", [376] = "\144\240Q^", [377] = "\131\174\136w\140\180\134", [378] = "\160\131q\131M\251\019\021", [379] = "\163\197J\148\244w\233\179\169\1429W\231\205\012", [380] = "DjEEccQJp6PSC", [381] = "\028\024\182", [382] = "oCnN9ey7R6Cp", [383] = "\204\234HVi", [384] = "\221~\203\223\"FF\204\017", [385] = "\027\002\248\011\127\193i\215\133\016\194", [386] = "math", [387] = "\209%F\246", [388] = "\212\213\22143", [389] = "~\162\028\186<\015\187\246NL\214+qd\246&", [390] = "\176|Np6\149\167\179H\007", [391] = "\156\179\179\145\173*\176u<\195", [392] = "Y1BjRqI8wTjCY", [393] = "\140\222\189\223+\022\222\1740", [394] = "Disconnect", [395] = "\208\221\187\148\"\154X\167\t3\217!", [396] = "\188\011\218\027\185\150", [397] = "]\185\148\007", [398] = "\253\170c\207", [399] = "`\245\231\173", [400] = "k\207[n@)\130\242", [401] = "random", [402] = "\133\142\220\138\\\155b\185N\211}#\237-\239\147U8\145", [403] = "'\185\016$\028\1910", [404] = "\206\208\193\224\138]", [405] = "1,:\135\203+\185\198\n", [406] = "\178\225P\250", [407] = "\175Q\146>M", [408] = "\237H7\136\0223d\023", [409] = "k\208\139\002\016\2268\200", [410] = "\196\199\228\208Q:j", [411] = "&{?\243\152\162\nV\150", [412] = "]3S\141fd\219", [413] = "\2301C", [414] = "-L\193", [415] = "\241&\214t", [416] = "e\133=\198\193\185", [417] = "uQ2MRIwmS59Hq", [418] = ",\177\133\129", [419] = "5zt5aoCzrP4H", [420] = "\204\188T\197\155\169\t\007", [421] = "\136", [422] = "\204\172\226", [423] = "\018\174U,\189", [424] = "mmRi9bXDdkRw7l", [425] = "\195\132q@", [426] = "JgNoO2A7nULP5D", [427] = "kf&", [428] = "2nUlyHfGk9QM", [429] = "l2", [430] = "Instance", [431] = "\150\178\02230", [432] = "U2\173\172g \002\212", [433] = "AypyrgcpSf82zf", [434] = "a2\252\176w\147\128\198\255\008", [435] = "\226\189\027F", [436] = "|\237\226U", [437] = "\206\210\241", [438] = "GetDescendants", [439] = "\028\0186\206w])\138\205\160:\133<\183", [440] = "M(\220T\158\007\157p\155\220", [441] = "d\206\166\018\225+ ", [442] = "\212\167\"t", [443] = "\199\243\234k\246\174\218\192H\019", [444] = "\002\240\225{\140", [445] = "\202\022\253\138", [446] = "\200\253\127\2199kUo\245w\216\185W\251\212", [447] = "\245%\186\165", [448] = "\007\252\247\2447", [449] = "hPgq13Z1B9ml", [450] = "\132\218t\255\139:", [451] = "\018<Hdc\127\226G", [452] = "\142\204\204Z\177r8\016", [453] = "\177\165|", [454] = "F\190c\132\192\r\229\197\246\214M\232\129", [455] = "\197\186\238\006", [456] = "\005k\159-\250", [457] = "\190\"\014\024\157", [458] = "sT\217\005J\176\004\248", [459] = "tostring", [460] = "\242QF\127!\191\252\148\176\231\237\001\2378k\016\206\015\176H\221\002", [461] = "\233W\022\245\153E@u\133\246", [462] = "\170#\026V\160", [463] = "\199\210\155\150-", [464] = "N\183y", [465] = "~F9N\190\206X\198\t", [466] = "\\W\230m\002\220o\243\239", [467] = "\206\252\241(*\150S\019\163I\145", [468] = "2#\149F\224}\214", [469] = "gsub", [470] = "\242z\226\028\224%\242v", [471] = "\188-\147e>!\017P\206\174", [472] = "\022\153h&", [473] = "y.\232\237\029\007\023!6\242|\166\205\025", [474] = "\025\252\144?L", [475] = "\147lw~\000\201{\146\007\207\159qe", [476] = "byte", [477] = "io|\016#\154+\022", [478] = "W\147\176", [479] = "/4\228\r`\142h\\\211\179", [480] = "concat", [481] = "\142=\"\190_\189", [482] = "nA\217\203\190\015N\194\145<C\183\151\210", [483] = "HttpGet", [484] = "\134\134r\227;\213\144\150", [485] = "R\130\157\001 R\239", [486] = "\158\182b&\025o\206", [487] = "8vJXDu8XB4CulS", [488] = "", [489] = "`\169!\194\167\170\229\185\2239\r\014", [490] = "0),\027\163L\030\188\2418\237\176\149\254", [491] = "\000\003\151l{", [492] = "\020j\246\185\001\246g<", [493] = "\230bo", [494] = "char", [495] = "\177\194\185\147", [496] = "\003\154\162", [497] = "5-\145=\133Z\139R\027\020\031\221\160\176\201H8", [498] = "print", [499] = "\023\157\206", [500] = "Tamper Detected!", [501] = "\004.\195\154\028H\209\233\165\145", [502] = "\182\232\027>_e\160", [503] = "o\165\190\253:\217\147^", [504] = "\244\t\186@\026\170oL+J\020\128b\014l", [505] = "zTnPQyxOq0RLz0", [506] = "Mz\251\t", [507] = "\\I\237\001?\023", [508] = "\190r\206\007\175|", [509] = "\248", [510] = "3loK5UQtLd2W", [511] = "\026X\227\196\1459D\132", [512] = "\226\163/\179", [513] = "\143\151\162L(\186", [514] = "\223C{\255", [515] = "l\027|\153\232!\232\251\230_\253\214\245LE\131e", [516] = "\246o\008\030\012,\000j\136\143", [517] = "\227\162c\235\205\208\153", [518] = "8yTrm7gBDVx5", [519] = "table", [520] = "\150\235\008\251", [521] = "\015\238\234\219\003\145C\222\186\239\237K", [522] = "\022\127`C", [523] = "\242\011\233&\rs\170+T\215\209", [524] = "\193a\174=o\166\210dT", [525] = "\r\191\006[5\002\242b", [526] = "VPMl0kb11Bhmfo", [527] = "V\148\132\218\176A\235\210J[O\236\178\236~>", [528] = "\195\187\015\146\162\233\255\193", [529] = "PYoGfcUH7WkmXQ", [530] = "\022\129F7\231\129c\209t\185\238\161/w\193\241\211", [531] = "\169U?rW\228", [532] = "9\202\181\230", [533] = "f\210\020\177\001", [534] = "\223\233\157\196\220\002\019\030", [535] = "iQ378nDlDUE9", [536] = "\1774o\135yE\197p{\004\210\015", [537] = "\202}\161", [538] = ";d\192 ", }
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
+Color3.fromRGB(20, 20, 20)
+Color3.fromRGB(255, 255, 255)
+Color3.fromRGB(255, 255, 255)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MONSFAMS"
+local frame = Instance.new("Frame")
+UDim2.new(0, 160, 0, 145)
+frame.Size = UDim2.new(0, 160, 0, 145)
+UDim2.new(0, 10, 0.5, -35)
+frame.Position = UDim2.new(0, 10, 0.5, -35)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+local uIStroke = Instance.new("UIStroke", frame)
+uIStroke.Color = Color3.fromRGB(255, 255, 255)
+local uIStroke2 = Instance.new("UIStroke", frame)
+uIStroke2.Thickness = 1
+local uICorner = Instance.new("UICorner", frame)
+local new = UDim.new(0, 8)
+uICorner.CornerRadius = new
+local frame2 = Instance.new("Frame")
+UDim2.new(1, -30, 0, 28)
+frame2.Size = UDim2.new(1, -30, 0, 28)
+UDim2.new(0, 8, 0, 0)
+frame2.Position = UDim2.new(0, 8, 0, 0)
+frame2.BackgroundTransparency = 1
+frame2.Parent = frame
+local textLabel = Instance.new("TextLabel")
+UDim2.new(1, 0, 1, 0)
+textLabel.Size = UDim2.new(1, 0, 1, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.Text = "MONSFAMS"
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+textLabel.TextSize = 16
+textLabel.Font = Enum.Font.SourceSans
+textLabel.TextXAlignment = Enum.TextXAlignment.Left
+textLabel.Parent = frame2
+local textButton = Instance.new("TextButton")
+UDim2.new(0, 20, 0, 20)
+textButton.Size = UDim2.new(0, 20, 0, 20)
+UDim2.new(1, -26, 0.5, -10)
+textButton.Position = UDim2.new(1, -26, 0.5, -10)
+Color3.fromRGB(40, 40, 40)
+textButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+textButton.BackgroundTransparency = 0
+textButton.Text = "\226\136\146"
+textButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+textButton.TextSize = 16
+textButton.Font = Enum.Font.SourceSans
+textButton.Parent = frame
+local uICorner2 = Instance.new("UICorner", textButton)
+local new2 = UDim.new(0, 4)
+uICorner2.CornerRadius = new2
+local uIStroke3 = Instance.new("UIStroke", textButton)
+uIStroke3.Color = Color3.fromRGB(255, 255, 255)
+local frame3 = Instance.new("Frame")
+UDim2.new(1, -16, 0, 105)
+frame3.Size = UDim2.new(1, -16, 0, 105)
+UDim2.new(0, 8, 0, 32)
+frame3.Position = UDim2.new(0, 8, 0, 32)
+frame3.BackgroundTransparency = 1
+frame3.Parent = frame
+textButton.MouseButton1Click:Connect(function(...)
+    UDim2.new(0, 160, 0, 30)
+    frame.Size = UDim2.new(0, 160, 0, 30)
+    frame3.Visible = false
+    textButton.Text = "+"
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UDim2.new(1, -30, 1, 0)
+    frame2.Size = UDim2.new(1, -30, 1, 0)
+    UDim2.new(0, 8, 0, 0)
+    frame2.Position = UDim2.new(0, 8, 0, 0)
 end)
-if not success then
-    warn("Gagal menjalankan Wazzap: " .. tostring(err))
-end
-
--- 2. Fungsi Denghub UI (muncul sebentar lalu auto-close)
-local function showDenghubUI()
-    local Gui = Instance.new("ScreenGui")
-    Gui.Name = "DenghubUI"
-    Gui.Parent = game:GetService("CoreGui")
-
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 300, 0, 150)
-    Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
-    Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Frame.BorderSizePixel = 0
-    Frame.Parent = Gui
-
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, 30)
-    Title.BackgroundTransparency = 1
-    Title.Text = "Denghub - Server Detector"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextScaled = true
-    Title.Font = Enum.Font.GothamBold
-    Title.Parent = Frame
-
-    local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 100, 0, 30)
-    CloseBtn.Position = UDim2.new(0.5, -50, 0.6, 0)
-    CloseBtn.Text = "Tutup Manual"
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseBtn.Parent = Frame
-    CloseBtn.MouseButton1Click:Connect(function()
-        Gui:Destroy()
+frame2.InputBegan:Connect(function(...)
+end)
+frame2.InputChanged:Connect(function(...)
+end)
+local UserInputService = game:GetService("UserInputService")
+UserInputService.InputChanged:Connect(function(...)
+end)
+local textButton2 = Instance.new("TextButton")
+UDim2.new(0.9, 0, 0, 26)
+textButton2.Size = UDim2.new(0.9, 0, 0, 26)
+UDim2.new(0.5, -72, 0.5, -82)
+textButton2.Position = UDim2.new(0.5, -72, 0.5, -82)
+textButton2.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+textButton2.BackgroundTransparency = 0.3
+textButton2.Text = "Web/Apk Track"
+textButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
+textButton2.TextSize = 14
+textButton2.Font = Enum.Font.SourceSans
+textButton2.Parent = frame3
+local uICorner3 = Instance.new("UICorner", textButton2)
+local new3 = UDim.new(0, 6)
+uICorner3.CornerRadius = new3
+local uIStroke4 = Instance.new("UIStroke", textButton2)
+uIStroke4.Color = Color3.fromRGB(255, 255, 255)
+textButton2.MouseButton1Click:Connect(function(...)
+    textButton2.Text = "Loading..."
+    -- URL: https://raw.githubusercontent.com/dengjiangbin/fish-it/main/tracker.lua
+    -- LOADSTRING DETECTED: size=0
+    textButton2.Text = "Loaded!"
+    task.wait(1)
+    textButton2.Text = "Web/Apk Track"
+end)
+local textButton3 = Instance.new("TextButton")
+UDim2.new(0.9, 0, 0, 26)
+textButton3.Size = UDim2.new(0.9, 0, 0, 26)
+UDim2.new(0.5, -72, 0.5, -22)
+textButton3.Position = UDim2.new(0.5, -72, 0.5, -22)
+textButton3.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+textButton3.BackgroundTransparency = 0.3
+textButton3.Text = "Reduce"
+textButton3.TextColor3 = Color3.fromRGB(255, 255, 255)
+textButton3.TextSize = 14
+textButton3.Font = Enum.Font.SourceSans
+textButton3.Parent = textButton3  -- (ini biarkan sesuai asli, meskipun agak aneh)
+local uICorner4 = Instance.new("UICorner", textButton3)
+local new4 = UDim.new(0, 6)
+uICorner4.CornerRadius = new4
+local uIStroke5 = Instance.new("UIStroke", textButton3)
+uIStroke5.Color = Color3.fromRGB(255, 255, 255)
+local textButton4 = Instance.new("TextButton")
+UDim2.new(0.9, 0, 0, 26)
+textButton4.Size = UDim2.new(0.9, 0, 0, 26)
+UDim2.new(0.5, -72, 0.5, -52)
+textButton4.Position = UDim2.new(0.5, -72, 0.5, -52)
+textButton4.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+textButton4.BackgroundTransparency = 0.3
+textButton4.Text = "DENG.lua"
+textButton4.TextColor3 = Color3.fromRGB(255, 255, 255)
+textButton4.TextSize = 14
+textButton4.Font = Enum.Font.SourceSans
+textButton4.Parent = textButton3
+local uICorner5 = Instance.new("UICorner", textButton4)
+local new5 = UDim.new(0, 6)
+uICorner5.CornerRadius = new5
+local uIStroke6 = Instance.new("UIStroke", textButton4)
+uIStroke6.Color = Color3.fromRGB(255, 255, 255)
+textButton4.MouseButton1Click:Connect(function(...)
+    textButton4.Text = "Loading..."
+    -- URL: https://raw.githubusercontent.com/GrexXMeng/Mengs/refs/heads/main/Deng.lua
+    -- LOADSTRING DETECTED: size=0
+    textButton4.Text = "Loaded!"
+    task.wait(1)
+    textButton4.Text = "DENG.lua"
+end)
+local textLabel2 = Instance.new("TextLabel")
+UDim2.new(1, 0, 0, 18)
+textLabel2.Size = UDim2.new(1, 0, 0, 18)
+UDim2.new(0, 0, 1, -20)
+textLabel2.Position = UDim2.new(0, 0, 1, -20)
+textLabel2.BackgroundTransparency = 1
+textLabel2.Text = ""
+Color3.fromRGB(255, 255, 255)
+textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
+textLabel2.TextSize = 14
+textLabel2.Font = Enum.Font.SourceSans
+textLabel2.Parent = textButton3
+textButton3.MouseButton1Click:Connect(function(...)
+    textButton3.Text = "Reducing..."
+    textButton3.AutoButtonColor = false
+    local spawn = task.spawn(function(...)
+        Lighting.GlobalShadows = false
+        Lighting.Brightness = 1
+        Color3.fromRGB(50, 50, 50)
+        Lighting.Ambient = Color3.fromRGB(50, 50, 50)
+        Color3.fromRGB(50, 50, 50)
+        Lighting.OutdoorAmbient = Color3.fromRGB(50, 50, 50)
+        Color3.fromRGB(50, 50, 50)
+        Lighting.FogColor = Color3.fromRGB(50, 50, 50)
+        local descendants = workspace:GetDescendants()
+        local descendants2 = Lighting:GetDescendants()
+        local children = workspace:GetChildren()
+        task.wait(0.016)
+        local descendants3 = workspace:GetDescendants()
+        task.wait(0.016)
+        local descendants4 = workspace:GetDescendants()
+        task.wait(0.016)
+        local sky = workspace:FindFirstChildOfClass("Sky")
+        sky:Destroy()
+        local clear = workspace.Terrain:Clear()
+        task.wait(0.016)
+        local descendants5 = workspace:GetDescendants()
+        local isA = v1:IsA("Model")
+        local humanoid = v1:FindFirstChildOfClass("Humanoid")
+        local playerList = Players:GetPlayers()
+        v1:Destroy()
+        task.wait(0.016)
+        local playerList2 = Players:GetPlayers()
+        local descendants6 = v1.Character:GetDescendants()
+        local isA2 = v1:IsA("BasePart")
+        v1.Transparency = 1
+        v1.CanCollide = false
+        task.wait(0.016)
+        local descendants7 = Players.LocalPlayer.Character:GetDescendants()
+        local isA3 = v1:IsA("BasePart")
+        Color3.fromRGB(50, 50, 50)
+        v1.Color = Color3.fromRGB(50, 50, 50)
+        v1.Material = Enum.Material.Plastic
+        SoundService.Volume = 0
+        task.wait(0.5)
+        textButton3.Text = "Success"
+        task.wait(1)
+        textButton3.Text = "Auto: ON"
+        RunService.Heartbeat:Connect(function(...)
+            textLabel2.Text = "Reduce: 01:00:00"
+        end)
+        task.wait(1)
     end)
+end)
+screenGui.Parent = Players.LocalPlayer.PlayerGui
+task.wait(2)
 
-    -- Auto-close setelah 3 detik
-    task.wait(3)
-    if Gui and Gui.Parent then
-        Gui:Destroy()
-    end
-end
+-- ==================== FITUR TAMBAHAN: AUTO CLOSE ====================
+-- (Script asli di atas TIDAK diubah, hanya ditambahkan bagian di bawah ini)
 
--- 3. Minimize / tutup script ReduceMons (coba cari GUI-nya)
-local function minimizeReduceMons()
-    local reduceGui = game:GetService("CoreGui"):FindFirstChild("ReduceMonsUI")
-    if reduceGui then
-        reduceGui.Enabled = false  -- Minimize (bisa juga :Destroy())
-        print("[Wrapper] ReduceMons GUI diminimize.")
+-- 1. Minimize GUI secara otomatis
+frame.Size = UDim2.new(0, 160, 0, 30)
+frame3.Visible = false
+textButton.Text = "+"
+textLabel.TextXAlignment = Enum.TextXAlignment.Left
+frame2.Size = UDim2.new(1, -30, 1, 0)
+frame2.Position = UDim2.new(0, 8, 0, 0)
+
+-- 2. Jalankan Reduce secara otomatis (menduplikasi kode tombol Reduce)
+textButton3.Text = "Reducing..."
+textButton3.AutoButtonColor = false
+task.spawn(function()
+    Lighting.GlobalShadows = false
+    Lighting.Brightness = 1
+    Color3.fromRGB(50, 50, 50)
+    Lighting.Ambient = Color3.fromRGB(50, 50, 50)
+    Color3.fromRGB(50, 50, 50)
+    Lighting.OutdoorAmbient = Color3.fromRGB(50, 50, 50)
+    Color3.fromRGB(50, 50, 50)
+    Lighting.FogColor = Color3.fromRGB(50, 50, 50)
+    local descendants = workspace:GetDescendants()
+    local descendants2 = Lighting:GetDescendants()
+    local children = workspace:GetChildren()
+    task.wait(0.016)
+    local descendants3 = workspace:GetDescendants()
+    task.wait(0.016)
+    local descendants4 = workspace:GetDescendants()
+    task.wait(0.016)
+    local sky = workspace:FindFirstChildOfClass("Sky")
+    sky:Destroy()
+    local clear = workspace.Terrain:Clear()
+    task.wait(0.016)
+    local descendants5 = workspace:GetDescendants()
+    local isA = v1:IsA("Model")
+    local humanoid = v1:FindFirstChildOfClass("Humanoid")
+    local playerList = Players:GetPlayers()
+    v1:Destroy()
+    task.wait(0.016)
+    local playerList2 = Players:GetPlayers()
+    local descendants6 = v1.Character:GetDescendants()
+    local isA2 = v1:IsA("BasePart")
+    v1.Transparency = 1
+    v1.CanCollide = false
+    task.wait(0.016)
+    local descendants7 = Players.LocalPlayer.Character:GetDescendants()
+    local isA3 = v1:IsA("BasePart")
+    Color3.fromRGB(50, 50, 50)
+    v1.Color = Color3.fromRGB(50, 50, 50)
+    v1.Material = Enum.Material.Plastic
+    SoundService.Volume = 0
+    task.wait(0.5)
+    textButton3.Text = "Success"
+    task.wait(1)
+    textButton3.Text = "Auto: ON"
+    RunService.Heartbeat:Connect(function()
+        textLabel2.Text = "Reduce: 01:00:00"
+    end)
+    task.wait(1)
+end)
+
+-- 3. Tunggu proses reduce selesai (sekitar 6 detik cukup)
+task.wait(6)
+
+-- 4. Hancurkan GUI
+screenGui:Destroy()
+
+-- 5. Tutup executor secara otomatis
+local success, err = pcall(function()
+    if syn and syn.quit then
+        syn.quit()
+    elseif krnl and krnl.quit then
+        krnl.quit()
+    elseif delta and delta.close then
+        delta.close()
+    elseif flushscript then
+        flushscript()
     else
-        print("[Wrapper] ReduceMons GUI tidak ditemukan.")
+        -- fallback: mencoba fungsi quit generik
+        if quit then quit() end
     end
-end
+end)
 
--- 4. Tutup Delta Executor
-local function closeDelta()
-    -- Cara resmi di Delta biasanya executor:quit()
-    pcall(function()
-        if executor and executor.quit then
-            executor.quit()
-        end
-    end)
-    -- Fallback lain (beberapa executor pakai syn.quit)
-    pcall(function()
-        if syn and syn.quit then
-            syn.quit()
-        end
-    end)
+if not success then
+    -- Jika gagal, tidak melakukan apa-apa agar tidak mengganggu
 end
-
--- 5. Jalankan semua fitur tambahan
-task.spawn(showDenghubUI)          -- Muncul UI di background
-task.wait(1)
-minimizeReduceMons()
-task.wait(1)
-closeDelta()
