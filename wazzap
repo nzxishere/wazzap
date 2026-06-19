@@ -1,132 +1,83 @@
--- ╔══════════════════════════════════════════════════╗
--- ║        REDUCE MONS  |  Auto-Clean Wrapper        ║
--- ║   by m0nsfams  —  wearedevs executor flow        ║
--- ╚══════════════════════════════════════════════════╝
+-- // Wrapper: Wazzap + Denghub UI + Minimize ReduceMons + Close Delta
 
--- ┌──────────────────────────────────────────────────┐
--- │                  KONFIGURASI                     │
--- └──────────────────────────────────────────────────┘
-local CONFIG = {
-    ScriptURL = "https://raw.githubusercontent.com/m0nsfams/reduce.v1/refs/heads/main/chreva",
-
-    -- Delay sebelum close UI (detik) — beri waktu DengHub muncul dulu
-    DelayBeforeClose = 2.5,
-
-    -- Nama-nama UI yang mau di-destroy
-    DengHubNames = {
-        "DengHub", "DengHubUI", "DengHub_Frame", "DengHubMain",
-        "denghub", "Deng", "Hub", "DengHubScript",
-    },
-    DeltaNames = {
-        "DeltaExecutorUI", "DeltaUI", "Delta_Main", "DeltaFrame",
-        "delta", "Delta",
-    },
-}
-
--- ┌──────────────────────────────────────────────────┐
--- │              HELPER: DESTROY UI                  │
--- └──────────────────────────────────────────────────┘
-local function DestroyByNames(names)
-    local layers = {
-        game:GetService("CoreGui"),
-        game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"),
-    }
-    for _, layer in ipairs(layers) do
-        if layer then
-            -- Cari exact name
-            for _, name in ipairs(names) do
-                local found = layer:FindFirstChild(name, true)
-                if found then
-                    pcall(function() found:Destroy() end)
-                end
-            end
-            -- Fallback: scan semua children, cek nama mengandung keyword
-            for _, obj in ipairs(layer:GetChildren()) do
-                local n = obj.Name:lower()
-                for _, name in ipairs(names) do
-                    if n:find(name:lower()) then
-                        pcall(function() obj:Destroy() end)
-                        break
-                    end
-                end
-            end
-        end
-    end
-end
-
--- ┌──────────────────────────────────────────────────┐
--- │         STEP 1 — JALANKAN SCRIPT KAMU            │
--- └──────────────────────────────────────────────────┘
-print("[Wrapper] Memuat script...")
-
-local ok, err = pcall(function()
-    local fn = loadstring(game:HttpGet(CONFIG.ScriptURL, true))
-    if fn then
-        fn()
-    else
-        error("loadstring gagal — cek URL")
-    end
+-- 1. Jalankan script Wazzap asli dari GitHub
+local success, err = pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/m0nsfams/reduce.v1/refs/heads/main/chreva"))()
 end)
-
-if not ok then
-    warn("[Wrapper] Script gagal: " .. tostring(err))
-    return
+if not success then
+    warn("Gagal menjalankan Wazzap: " .. tostring(err))
 end
 
-print("[Wrapper] Script berhasil dijalankan ✓")
+-- 2. Fungsi Denghub UI (muncul sebentar lalu auto-close)
+local function showDenghubUI()
+    local Gui = Instance.new("ScreenGui")
+    Gui.Name = "DenghubUI"
+    Gui.Parent = game:GetService("CoreGui")
 
--- ┌──────────────────────────────────────────────────┐
--- │   STEP 2 — TUNGGU DENGHUB MUNCUL, LALU CLOSE    │
--- └──────────────────────────────────────────────────┘
-task.delay(CONFIG.DelayBeforeClose, function()
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0, 300, 0, 150)
+    Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+    Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Frame.BorderSizePixel = 0
+    Frame.Parent = Gui
 
-    -- Close DengHub UI
-    DestroyByNames(CONFIG.DengHubNames)
-    print("[Wrapper] DengHub UI ditutup ✓")
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.BackgroundTransparency = 1
+    Title.Text = "Denghub - Server Detector"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextScaled = true
+    Title.Font = Enum.Font.GothamBold
+    Title.Parent = Frame
 
-    -- Minimize panel reduce/mons (ScreenGui buatan script kamu)
-    -- Scan semua ScreenGui dan minimize/destroy yang bukan game asli
-    local coreGui = game:GetService("CoreGui")
-    local playerGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
-
-    local keepList = {
-        -- nama-nama UI bawaan Roblox yang jangan disentuh
-        "RobloxGui", "CoreGui", "InspectAndBuyGui",
-        "AvatarEditorInGamePrompts", "PointsNotification",
-        "TopbarPlus", "VehicleGui",
-    }
-
-    local function isRobloxUI(name)
-        for _, v in ipairs(keepList) do
-            if name == v then return true end
-        end
-        return false
-    end
-
-    -- Cari ScreenGui yang kemungkinan milik script (reduce/mons)
-    for _, layer in ipairs({coreGui, playerGui}) do
-        if layer then
-            for _, obj in ipairs(layer:GetChildren()) do
-                if obj:IsA("ScreenGui") and not isRobloxUI(obj.Name) then
-                    -- Minimize: sembunyikan semua frame utama
-                    for _, child in ipairs(obj:GetDescendants()) do
-                        if child:IsA("Frame") and child.Parent == obj then
-                            pcall(function()
-                                child.Visible = false
-                            end)
-                        end
-                    end
-                end
-            end
-        end
-    end
-    print("[Wrapper] Script UI di-minimize ✓")
-
-    -- Sedikit delay lagi, baru close Delta
-    task.delay(0.5, function()
-        DestroyByNames(CONFIG.DeltaNames)
-        print("[Wrapper] Delta UI ditutup ✓")
-        print("[Wrapper] Semua selesai — server test berjalan bersih ✓")
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0, 100, 0, 30)
+    CloseBtn.Position = UDim2.new(0.5, -50, 0.6, 0)
+    CloseBtn.Text = "Tutup Manual"
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.Parent = Frame
+    CloseBtn.MouseButton1Click:Connect(function()
+        Gui:Destroy()
     end)
 
-end)
+    -- Auto-close setelah 3 detik
+    task.wait(3)
+    if Gui and Gui.Parent then
+        Gui:Destroy()
+    end
+end
+
+-- 3. Minimize / tutup script ReduceMons (coba cari GUI-nya)
+local function minimizeReduceMons()
+    local reduceGui = game:GetService("CoreGui"):FindFirstChild("ReduceMonsUI")
+    if reduceGui then
+        reduceGui.Enabled = false  -- Minimize (bisa juga :Destroy())
+        print("[Wrapper] ReduceMons GUI diminimize.")
+    else
+        print("[Wrapper] ReduceMons GUI tidak ditemukan.")
+    end
+end
+
+-- 4. Tutup Delta Executor
+local function closeDelta()
+    -- Cara resmi di Delta biasanya executor:quit()
+    pcall(function()
+        if executor and executor.quit then
+            executor.quit()
+        end
+    end)
+    -- Fallback lain (beberapa executor pakai syn.quit)
+    pcall(function()
+        if syn and syn.quit then
+            syn.quit()
+        end
+    end)
+end
+
+-- 5. Jalankan semua fitur tambahan
+task.spawn(showDenghubUI)          -- Muncul UI di background
+task.wait(1)
+minimizeReduceMons()
+task.wait(1)
+closeDelta()
