@@ -123,7 +123,7 @@ textButton3.Text = "Reduce"
 textButton3.TextColor3 = Color3.fromRGB(255, 255, 255)
 textButton3.TextSize = 14
 textButton3.Font = Enum.Font.SourceSans
-textButton3.Parent = textButton3  -- (ini biarkan sesuai asli, meskipun agak aneh)
+textButton3.Parent = textButton3
 local uICorner4 = Instance.new("UICorner", textButton3)
 local new4 = UDim.new(0, 6)
 uICorner4.CornerRadius = new4
@@ -289,23 +289,3 @@ task.wait(6)
 
 -- 4. Hancurkan GUI
 screenGui:Destroy()
-
--- 5. Tutup executor secara otomatis
-local success, err = pcall(function()
-    if syn and syn.quit then
-        syn.quit()
-    elseif krnl and krnl.quit then
-        krnl.quit()
-    elseif delta and delta.close then
-        delta.close()
-    elseif flushscript then
-        flushscript()
-    else
-        -- fallback: mencoba fungsi quit generik
-        if quit then quit() end
-    end
-end)
-
-if not success then
-    -- Jika gagal, tidak melakukan apa-apa agar tidak mengganggu
-end
