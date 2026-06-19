@@ -1,0 +1,583 @@
+-- ╔══════════════════════════════════════════════╗
+-- ║       SERVER TEST PANEL  |  by m0nsfams      ║
+-- ║   Auto Close Delta UI + DengHub + Minimize   ║
+-- ╚══════════════════════════════════════════════╝
+
+-- ┌─────────────────────────────────────────────┐
+-- │             KONFIGURASI UTAMA               │
+-- └─────────────────────────────────────────────┘
+local CONFIG = {
+    AutoCloseExecutorUI = true,   -- Auto close Delta / DengHub UI
+    MinimizeOnRun       = true,   -- Minimize panel setelah script jalan
+    PingRefreshRate     = 1,      -- Detik per refresh data server
+    MaxPingSamples      = 20,     -- Jumlah sample ping untuk rata-rata
+    ScriptURL           = "https://raw.githubusercontent.com/m0nsfams/reduce.v1/refs/heads/main/chreva",  
+    Theme = {
+        Primary   = Color3.fromRGB(10,  10,  18),
+        Secondary = Color3.fromRGB(18,  18,  30),
+        Accent    = Color3.fromRGB(99,  102, 241),
+        AccentGlow= Color3.fromRGB(129, 132, 255),
+        Text      = Color3.fromRGB(230, 230, 255),
+        SubText   = Color3.fromRGB(140, 140, 180),
+        Good      = Color3.fromRGB(52,  211, 153),
+        Warn      = Color3.fromRGB(251, 191, 36),
+        Bad       = Color3.fromRGB(248, 113, 113),
+        Border    = Color3.fromRGB(40,  40,  65),
+    }
+}
+
+-- ┌─────────────────────────────────────────────┐
+-- │         AUTO CLOSE EXECUTOR UI              │
+-- └─────────────────────────────────────────────┘
+local function CloseExecutorUI()
+    if not CONFIG.AutoCloseExecutorUI then return end
+
+    -- Delta UI
+    local deltaTargets = {
+        "DeltaExecutorUI",
+        "DeltaUI",
+        "Delta_Main",
+        "DeltaFrame",
+    }
+    -- DengHub UI
+    local dengTargets = {
+        "DengHub",
+        "DengHubUI",
+        "DengHub_Frame",
+        "DengHubMain",
+    }
+
+    local allTargets = {}
+    for _, v in ipairs(deltaTargets) do table.insert(allTargets, v) end
+    for _, v in ipairs(dengTargets)  do table.insert(allTargets, v) end
+
+    -- Cari dan destroy di semua layer UI
+    local layers = {
+        game:GetService("CoreGui"),
+        game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui", 5),
+    }
+
+    for _, layer in ipairs(layers) do
+        if layer then
+            for _, name in ipairs(allTargets) do
+                local found = layer:FindFirstChild(name, true)
+                if found then
+                    pcall(function() found:Destroy() end)
+                end
+            end
+            -- Fallback: scan semua ScreenGui yang mengandung nama executor
+            for _, obj in ipairs(layer:GetChildren()) do
+                local n = obj.Name:lower()
+                if n:find("delta") or n:find("denghub") or n:find("deng") then
+                    pcall(function() obj:Destroy() end)
+                end
+            end
+        end
+    end
+end
+
+-- ┌─────────────────────────────────────────────┐
+-- │            SERVICES & VARIABLES             │
+-- └─────────────────────────────────────────────┘
+local Players        = game:GetService("Players")
+local RunService     = game:GetService("RunService")
+local Stats          = game:GetService("Stats")
+local TweenService   = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService    = game:GetService("HttpService")
+
+local LocalPlayer  = Players.LocalPlayer
+local pingHistory  = {}
+local isMinimized  = false
+local isRunning    = false
+local connections  = {}
+
+-- ┌─────────────────────────────────────────────┐
+-- │              HELPER FUNCTIONS               │
+-- └─────────────────────────────────────────────┘
+local function Tween(obj, props, duration, style, dir)
+    local info = TweenInfo.new(
+        duration or 0.25,
+        style or Enum.EasingStyle.Quart,
+        dir or Enum.EasingDirection.Out
+    )
+    TweenService:Create(obj, info, props):Play()
+end
+
+local function GetPingColor(ping)
+    local T = CONFIG.Theme
+    if ping < 80  then return T.Good
+    elseif ping < 150 then return T.Warn
+    else return T.Bad end
+end
+
+local function GetFPSColor(fps)
+    local T = CONFIG.Theme
+    if fps >= 55 then return T.Good
+    elseif fps >= 30 then return T.Warn
+    else return T.Bad end
+end
+
+local function AvgPing()
+    if #pingHistory == 0 then return 0 end
+    local s = 0
+    for _, v in ipairs(pingHistory) do s = s + v end
+    return math.floor(s / #pingHistory)
+end
+
+local function GetRegion()
+    -- Deteksi region dari JobId prefix / DataCenter jika tersedia
+    local ok, region = pcall(function()
+        return game:GetService("Stats"):FindFirstChild("DataCenterName")
+            and game:GetService("Stats").DataCenterName.Value
+            or "Unknown"
+    end)
+    return ok and region or "Unknown"
+end
+
+local function GetServerAge()
+    local ok, age = pcall(function()
+        return math.floor(workspace.DistributedGameTime)
+    end)
+    return ok and age or 0
+end
+
+local function FormatTime(s)
+    local m = math.floor(s / 60)
+    local sec = s % 60
+    if m > 0 then
+        return string.format("%dm %ds", m, sec)
+    end
+    return string.format("%ds", sec)
+end
+
+local function GetServerLoad()
+    -- Estimasi load dari HeartbeatTime
+    local ok, hb = pcall(function()
+        return Stats.HeartbeatTimeMs
+    end)
+    if ok and hb then
+        local v = hb.Value
+        if v < 8 then return "Ringan", CONFIG.Theme.Good
+        elseif v < 20 then return "Sedang", CONFIG.Theme.Warn
+        else return "Berat", CONFIG.Theme.Bad end
+    end
+    return "N/A", CONFIG.Theme.SubText
+end
+
+-- ┌─────────────────────────────────────────────┐
+-- │              BUILD UI                       │
+-- └─────────────────────────────────────────────┘
+local T = CONFIG.Theme
+
+-- Hapus instance lama
+pcall(function()
+    local old = game:GetService("CoreGui"):FindFirstChild("ServerTestPanel")
+    if old then old:Destroy() end
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ServerTestPanel"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 999
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Main frame
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.new(0, 310, 0, 360)
+Main.Position = UDim2.new(0, 20, 0.5, -180)
+Main.BackgroundColor3 = T.Primary
+Main.BorderSizePixel = 0
+Main.ClipsDescendants = true
+Main.Parent = ScreenGui
+
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+
+-- Border glow
+local Border = Instance.new("UIStroke", Main)
+Border.Color = T.Accent
+Border.Thickness = 1.5
+Border.Transparency = 0.5
+
+-- Topbar
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Size = UDim2.new(1, 0, 0, 42)
+TopBar.BackgroundColor3 = T.Secondary
+TopBar.BorderSizePixel = 0
+TopBar.Parent = Main
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
+
+-- Fix top bar bottom corners
+local TopBarFix = Instance.new("Frame")
+TopBarFix.Size = UDim2.new(1, 0, 0, 12)
+TopBarFix.Position = UDim2.new(0, 0, 1, -12)
+TopBarFix.BackgroundColor3 = T.Secondary
+TopBarFix.BorderSizePixel = 0
+TopBarFix.Parent = TopBar
+
+-- Accent line bawah topbar
+local AccentLine = Instance.new("Frame")
+AccentLine.Size = UDim2.new(1, 0, 0, 2)
+AccentLine.Position = UDim2.new(0, 0, 1, 0)
+AccentLine.BackgroundColor3 = T.Accent
+AccentLine.BorderSizePixel = 0
+AccentLine.Parent = TopBar
+
+-- Dot dekorasi
+local function MakeDot(color, posX)
+    local d = Instance.new("Frame")
+    d.Size = UDim2.new(0, 11, 0, 11)
+    d.Position = UDim2.new(0, posX, 0.5, -5)
+    d.BackgroundColor3 = color
+    d.BorderSizePixel = 0
+    d.Parent = TopBar
+    Instance.new("UICorner", d).CornerRadius = UDim.new(1, 0)
+    return d
+end
+MakeDot(Color3.fromRGB(248, 113, 113), 12)
+MakeDot(Color3.fromRGB(251, 191, 36), 28)
+MakeDot(Color3.fromRGB(52, 211, 153), 44)
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -120, 1, 0)
+Title.Position = UDim2.new(0, 66, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "⚡ SERVER TEST PANEL"
+Title.TextColor3 = T.Text
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TopBar
+
+-- Minimize button
+local MinBtn = Instance.new("TextButton")
+MinBtn.Size = UDim2.new(0, 28, 0, 22)
+MinBtn.Position = UDim2.new(1, -60, 0.5, -11)
+MinBtn.BackgroundColor3 = T.Border
+MinBtn.Text = "—"
+MinBtn.TextColor3 = T.SubText
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 12
+MinBtn.BorderSizePixel = 0
+MinBtn.Parent = TopBar
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
+
+-- Close button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 28, 0, 22)
+CloseBtn.Position = UDim2.new(1, -28, 0.5, -11)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(80, 20, 20)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = T.Bad
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Parent = TopBar
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
+
+-- Content frame
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.new(1, 0, 1, -44)
+Content.Position = UDim2.new(0, 0, 0, 44)
+Content.BackgroundTransparency = 1
+Content.ClipsDescendants = true
+Content.Parent = Main
+
+local ContentPad = Instance.new("UIPadding", Content)
+ContentPad.PaddingLeft   = UDim.new(0, 12)
+ContentPad.PaddingRight  = UDim.new(0, 12)
+ContentPad.PaddingTop    = UDim.new(0, 10)
+ContentPad.PaddingBottom = UDim.new(0, 10)
+
+local ContentList = Instance.new("UIListLayout", Content)
+ContentList.SortOrder = Enum.SortOrder.LayoutOrder
+ContentList.Padding = UDim.new(0, 8)
+
+-- ── Stat Card Builder ──
+local function MakeCard(label, icon, order)
+    local card = Instance.new("Frame")
+    card.Size = UDim2.new(1, 0, 0, 52)
+    card.BackgroundColor3 = T.Secondary
+    card.BorderSizePixel = 0
+    card.LayoutOrder = order
+    card.Parent = Content
+    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
+    local st = Instance.new("UIStroke", card)
+    st.Color = T.Border
+    st.Thickness = 1
+
+    local ico = Instance.new("TextLabel")
+    ico.Size = UDim2.new(0, 32, 1, 0)
+    ico.Position = UDim2.new(0, 10, 0, 0)
+    ico.BackgroundTransparency = 1
+    ico.Text = icon
+    ico.TextSize = 20
+    ico.Font = Enum.Font.Gotham
+    ico.TextColor3 = T.Accent
+    ico.Parent = card
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0, 100, 0, 18)
+    lbl.Position = UDim2.new(0, 44, 0, 8)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = label
+    lbl.TextColor3 = T.SubText
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 11
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = card
+
+    local val = Instance.new("TextLabel")
+    val.Name = "Value"
+    val.Size = UDim2.new(1, -44, 0, 22)
+    val.Position = UDim2.new(0, 44, 0, 24)
+    val.BackgroundTransparency = 1
+    val.Text = "..."
+    val.TextColor3 = T.Text
+    val.Font = Enum.Font.GothamBold
+    val.TextSize = 14
+    val.TextXAlignment = Enum.TextXAlignment.Left
+    val.Parent = card
+
+    return val
+end
+
+-- ── Cards ──
+local vPing    = MakeCard("PING RATA-RATA",  "📡", 1)
+local vFPS     = MakeCard("FPS CLIENT",      "🖥️", 2)
+local vPlayers = MakeCard("PLAYERS",         "👥", 3)
+local vUptime  = MakeCard("SERVER UPTIME",   "⏱️", 4)
+local vLoad    = MakeCard("SERVER LOAD",     "⚙️", 5)
+
+-- ── Status bar ──
+local StatusBar = Instance.new("Frame")
+StatusBar.Size = UDim2.new(1, 0, 0, 28)
+StatusBar.BackgroundColor3 = T.Secondary
+StatusBar.BorderSizePixel = 0
+StatusBar.LayoutOrder = 6
+StatusBar.Parent = Content
+Instance.new("UICorner", StatusBar).CornerRadius = UDim.new(0, 8)
+
+local StatusDot = Instance.new("Frame")
+StatusDot.Size = UDim2.new(0, 8, 0, 8)
+StatusDot.Position = UDim2.new(0, 10, 0.5, -4)
+StatusDot.BackgroundColor3 = T.Good
+StatusDot.BorderSizePixel = 0
+StatusDot.Parent = StatusBar
+Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1, 0)
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(1, -24, 1, 0)
+StatusText.Position = UDim2.new(0, 24, 0, 0)
+StatusText.BackgroundTransparency = 1
+StatusText.Text = "Monitoring aktif..."
+StatusText.TextColor3 = T.SubText
+StatusText.Font = Enum.Font.Gotham
+StatusText.TextSize = 11
+StatusText.TextXAlignment = Enum.TextXAlignment.Left
+StatusText.Parent = StatusBar
+
+-- ── Run Script Button ──
+local RunBtn = Instance.new("TextButton")
+RunBtn.Size = UDim2.new(1, 0, 0, 36)
+RunBtn.BackgroundColor3 = T.Accent
+RunBtn.Text = "▶  JALANKAN SCRIPT PRIBADI"
+RunBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RunBtn.Font = Enum.Font.GothamBold
+RunBtn.TextSize = 12
+RunBtn.BorderSizePixel = 0
+RunBtn.LayoutOrder = 7
+RunBtn.Parent = Content
+Instance.new("UICorner", RunBtn).CornerRadius = UDim.new(0, 8)
+
+-- ┌─────────────────────────────────────────────┐
+-- │             DRAG FUNCTIONALITY              │
+-- └─────────────────────────────────────────────┘
+do
+    local dragging, dragStart, startPos
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging  = true
+            dragStart = input.Position
+            startPos  = Main.Position
+        end
+    end)
+    TopBar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            Main.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+-- ┌─────────────────────────────────────────────┐
+-- │           MINIMIZE / CLOSE LOGIC            │
+-- └─────────────────────────────────────────────┘
+MinBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        Tween(Main, {Size = UDim2.new(0, 310, 0, 42)}, 0.3)
+        MinBtn.Text = "▲"
+        Tween(Border, {Color = T.SubText}, 0.3)
+    else
+        Tween(Main, {Size = UDim2.new(0, 310, 0, 360)}, 0.3)
+        MinBtn.Text = "—"
+        Tween(Border, {Color = T.Accent}, 0.3)
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    -- Hentikan semua koneksi
+    for _, c in ipairs(connections) do
+        pcall(function() c:Disconnect() end)
+    end
+    Tween(Main, {Size = UDim2.new(0, 310, 0, 0), BackgroundTransparency = 1}, 0.25)
+    task.delay(0.3, function()
+        pcall(function() ScreenGui:Destroy() end)
+    end)
+end)
+
+-- ┌─────────────────────────────────────────────┐
+-- │           UPDATE LOOP (MONITORING)          │
+-- └─────────────────────────────────────────────┘
+local lastFPS    = 60
+local frameCount = 0
+local elapsed    = 0
+
+local fpsConn = RunService.RenderStepped:Connect(function(dt)
+    frameCount = frameCount + 1
+    elapsed    = elapsed + dt
+    if elapsed >= 1 then
+        lastFPS    = math.floor(frameCount / elapsed)
+        frameCount = 0
+        elapsed    = 0
+    end
+end)
+table.insert(connections, fpsConn)
+
+local updateConn = RunService.Heartbeat:Connect(function()
+    -- Ping
+    local ping = LocalPlayer:GetNetworkPing and
+                 math.floor(LocalPlayer:GetNetworkPing() * 1000) or
+                 0
+
+    table.insert(pingHistory, ping)
+    if #pingHistory > CONFIG.MaxPingSamples then
+        table.remove(pingHistory, 1)
+    end
+
+    local avg = AvgPing()
+    vPing.Text      = avg .. " ms  (now: " .. ping .. " ms)"
+    vPing.TextColor3 = GetPingColor(avg)
+
+    -- FPS
+    vFPS.Text       = lastFPS .. " fps"
+    vFPS.TextColor3 = GetFPSColor(lastFPS)
+
+    -- Players
+    local pCount    = #Players:GetPlayers()
+    local maxP      = game.Players.MaxPlayers
+    vPlayers.Text   = pCount .. " / " .. maxP .. " players"
+    local pRatio    = pCount / math.max(maxP, 1)
+    vPlayers.TextColor3 = pRatio > 0.8 and T.Bad
+                       or pRatio > 0.5 and T.Warn
+                       or T.Good
+
+    -- Uptime
+    local age = GetServerAge()
+    vUptime.Text = FormatTime(age)
+    vUptime.TextColor3 = T.Text
+
+    -- Server Load
+    local loadText, loadColor = GetServerLoad()
+    vLoad.Text       = loadText
+    vLoad.TextColor3 = loadColor
+
+    -- Status dot pulse via color
+    local pulse = math.abs(math.sin(tick() * 2))
+    StatusDot.BackgroundColor3 = Color3.fromRGB(
+        math.floor(52 + pulse * 30),
+        math.floor(211 - pulse * 10),
+        math.floor(153 - pulse * 20)
+    )
+end)
+table.insert(connections, updateConn)
+
+-- ┌─────────────────────────────────────────────┐
+-- │         RUN SCRIPT PRIBADI BUTTON           │
+-- └─────────────────────────────────────────────┘
+RunBtn.MouseButton1Click:Connect(function()
+    if isRunning then return end
+    isRunning = true
+
+    RunBtn.Text = "⏳ Memuat script..."
+    Tween(RunBtn, {BackgroundColor3 = T.Warn}, 0.2)
+
+    task.spawn(function()
+        -- Jalankan script kamu di sini
+        -- Ganti ScriptURL di CONFIG, atau paste loadstring di bawah:
+        local ok, err = pcall(function()
+            if CONFIG.ScriptURL ~= "" then
+                local fn = loadstring(game:HttpGet(CONFIG.ScriptURL, true))
+                if fn then fn() end
+            else
+                -- ══ PASTE SCRIPT KAMU DI SINI ══
+                -- contoh: loadstring(game:HttpGet("https://...", true))()
+                warn("[ServerTest] ScriptURL kosong. Isi CONFIG.ScriptURL atau paste script di sini.")
+            end
+        end)
+
+        if ok then
+            RunBtn.Text = "✅ Script Berjalan"
+            Tween(RunBtn, {BackgroundColor3 = T.Good}, 0.2)
+            StatusText.Text = "Script aktif — monitoring lanjut"
+
+            -- Auto minimize setelah script jalan
+            if CONFIG.MinimizeOnRun and not isMinimized then
+                task.delay(1.5, function()
+                    isMinimized = true
+                    Tween(Main, {Size = UDim2.new(0, 310, 0, 42)}, 0.3)
+                    MinBtn.Text = "▲"
+                end)
+            end
+        else
+            RunBtn.Text = "❌ Error — Coba Lagi"
+            Tween(RunBtn, {BackgroundColor3 = T.Bad}, 0.2)
+            StatusText.Text = "Error: " .. tostring(err):sub(1, 60)
+            task.delay(3, function()
+                isRunning = false
+                RunBtn.Text = "▶  JALANKAN SCRIPT PRIBADI"
+                Tween(RunBtn, {BackgroundColor3 = T.Accent}, 0.3)
+            end)
+        end
+    end)
+end)
+
+-- ┌─────────────────────────────────────────────┐
+-- │         AUTO CLOSE EXECUTOR UI              │
+-- └─────────────────────────────────────────────┘
+task.delay(0.5, CloseExecutorUI)   -- Delay sedikit agar game loaded dulu
+
+-- ┌─────────────────────────────────────────────┐
+-- │              ENTRANCE ANIMATION             │
+-- └─────────────────────────────────────────────┘
+Main.Size = UDim2.new(0, 310, 0, 0)
+Tween(Main, {Size = UDim2.new(0, 310, 0, 360)}, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+-- Done
+print("[ServerTest] Panel aktif ✓  |  Auto-close executor UI: " .. tostring(CONFIG.AutoCloseExecutorUI))
